@@ -1,9 +1,9 @@
 # AI E-Commerce Assistant
 
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
+[![Java](https://img.shields.io/badge/Java-17+-007396.svg)](https://openjdk.java.net)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.0+-6DB33F.svg)](https://spring.io/projects/spring-boot)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3+-4FC08D.svg)](https://vuejs.org)
-[![Python](https://img.shields.io/badge/Python-3.9+-3776AB.svg)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com)
+[![Maven](https://img.shields.io/badge/Maven-3.8+-C71A36.svg)](https://maven.apache.org)
 
 > 基于AI的电商智能助手平台，提供产品分析、价格优化、库存管理、客户洞察等全方位电商运营支持。
 
@@ -25,13 +25,16 @@ AI E-Commerce Assistant 是一个集成多种AI能力的电商智能运营平台
 ## 🏗️ 技术架构
 
 ### 后端技术栈
-- **API框架**: FastAPI (Python 3.9+)
-- **AI/ML库**: scikit-learn, pandas, numpy, transformers
-- **数据库**: PostgreSQL + Redis缓存
-- **消息队列**: Celery + Redis
-- **搜索引擎**: Elasticsearch
-- **认证授权**: JWT + OAuth2
+- **API框架**: Spring Boot 3.0+ (Java 17+)
+- **构建工具**: Maven 3.8+
+- **AI/ML库**: Deeplearning4j, Weka, Apache Commons Math
+- **数据库**: PostgreSQL 13+ + Redis缓存
+- **消息队列**: Spring Kafka + Redis
+- **搜索引擎**: Elasticsearch 8.x
+- **认证授权**: Spring Security + JWT + OAuth2
 - **容器化**: Docker + Docker Compose
+- **ORM框架**: Spring Data JPA + Hibernate
+- **API文档**: Springdoc OpenAPI 2.0
 
 ### 前端技术栈
 - **框架**: Vue.js 3 + Composition API
@@ -98,7 +101,8 @@ ai-ecommerce-assistant/
 
 ### 环境要求
 
-- **Python**: 3.9+
+- **Java**: 17+
+- **Maven**: 3.8+
 - **Node.js**: 18+
 - **PostgreSQL**: 13+
 - **Redis**: 6+
@@ -116,20 +120,18 @@ cd ai-ecommerce-assistant
 ```bash
 cd src/backend
 
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# 或 venv\Scripts\activate  # Windows
-
-# 安装依赖
-pip install -r requirements.txt
+# 编译项目
+mvn clean compile
 
 # 配置环境变量
-cp .env.example .env
-# 编辑 .env 文件，填入配置信息
+cp application.yml.example application.yml
+# 编辑 application.yml 文件，填入配置信息
 
 # 启动开发服务器
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+mvn spring-boot:run
+
+# 或使用Java命令启动
+java -jar target/ai-ecommerce-assistant-1.0.0.jar
 ```
 
 ### 3. 前端设置
@@ -281,7 +283,7 @@ AI_MODELS = {
 ### 单元测试
 ```bash
 cd src/backend
-pytest tests/unit/ -v
+mvn test
 
 cd src/frontend
 npm run test:unit
@@ -290,7 +292,7 @@ npm run test:unit
 ### 集成测试
 ```bash
 cd src/backend
-pytest tests/integration/ -v
+mvn verify -Pintegration-test
 ```
 
 ### E2E测试
