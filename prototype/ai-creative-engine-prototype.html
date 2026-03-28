@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI创意迭代引擎 - MVP原型</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #2c3e50; margin-bottom: 10px; }
+        .header p { color: #7f8c8d; font-size: 16px; }
+        
+        .workflow-container { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+        
+        .iteration-area { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        .step { margin-bottom: 30px; border-left: 4px solid #3498db; padding-left: 20px; }
+        .step.active { border-color: #e74c3c; }
+        .step.completed { border-color: #27ae60; }
+        
+        .step-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .step-number { width: 32px; height: 32px; border-radius: 50%; background: #3498db; color: white; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-weight: bold; }
+        .step.active .step-number { background: #e74c3c; }
+        .step.completed .step-number { background: #27ae60; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50; }
+        .input-group textarea, .input-group input { width: 100%; padding: 12px; border: 2px solid #ecf0f1; border-radius: 8px; font-size: 14px; transition: border-color 0.3s; }
+        .input-group textarea:focus, .input-group input:focus { outline: none; border-color: #3498db; }
+        
+        .image-upload { border: 2px dashed #bdc3c7; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .image-upload:hover { border-color: #3498db; background: #f8f9fa; }
+        .image-upload img { max-width: 100%; max-height: 200px; border-radius: 4px; margin-top: 10px; }
+        
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.3s; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-secondary:hover { background: #7f8c8d; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-success:hover { background: #229954; }
+        
+        .sidebar { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: fit-content; }
+        .sidebar h3 { margin-bottom: 20px; color: #2c3e50; }
+        
+        .iteration-history { max-height: 400px; overflow-y: auto; }
+        .history-item { border: 1px solid #ecf0f1; border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; }
+        .history-item:hover { border-color: #3498db; background: #f8f9fa; }
+        .history-item.active { border-color: #e74c3c; background: #fff5f5; }
+        
+        .result-display { background: #f8f9fa; border-radius: 8px; padding: 16px; margin-top: 15px; }
+        .result-text { background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #3498db; margin-bottom: 10px; }
+        .result-image { max-width: 100%; border-radius: 6px; margin-top: 10px; }
+        
+        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        .progress-bar { width: 100%; height: 6px; background: #ecf0f1; border-radius: 3px; margin: 20px 0; }
+        .progress-fill { height: 100%; background: #3498db; border-radius: 3px; transition: width 0.3s; }
+        
+        .chain-visualization { background: #2c3e50; color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .chain-step { display: inline-block; padding: 8px 16px; margin: 0 5px; background: #34495e; border-radius: 20px; font-size: 14px; }
+        .chain-step.active { background: #e74c3c; }
+        .chain-step.completed { background: #27ae60; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 AI创意迭代引擎</h1>
+            <p>文图生文 → 文再生图 链式创意优化</p>
+        </div>
+
+        <div class="chain-visualization">
+            <strong>当前工作流:</strong>
+            <span class="chain-step completed">输入</span>
+            <span class="chain-step active">文图生文</span>
+            <span class="chain-step">文再生图</span>
+            <span class="chain-step">迭代优化</span>
+            <span class="chain-step">导出</span>
+        </div>
+
+        <div class="workflow-container">
+            <div class="iteration-area">
+                <!-- 步骤1: 文图生文 -->
+                <div class="step active" id="step1">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <h3>📝 文图生文</h3>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>原始文字描述</label>
+                        <textarea rows="3" placeholder="请输入您的产品描述、创意想法或改进需求...">一款简约风格的无线蓝牙耳机，适合运动和日常使用</textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>参考图片</label>
+                        <div class="image-upload" onclick="document.getElementById('file-input').click()">
+                            <p>📁 点击上传参考图片</p>
+                            <p style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">支持 JPG, PNG 格式，最大 10MB</p>
+                            <img id="preview-img" style="display: none;" alt="预览图">
+                        </div>
+                        <input type="file" id="file-input" accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="generateText()">🚀 生成优化描述</button>
+                    
+                    <div class="result-display" id="text-result" style="display: none;">
+                        <label>AI生成的优化描述:</label>
+                        <div class="result-text" id="generated-text">
+                            全新升级的无线蓝牙耳机，采用人体工学设计，完美适配运动与日常场景。轻盈机身配合防滑耳套，即使高强度运动也能稳固佩戴。Hi-Fi音质芯片带来沉浸式听觉体验，单次充电可持续播放8小时，满足全天音乐需求。简约时尚外观，彰显个性品味。
+                        </div>
+                        <button class="btn btn-secondary" onclick="copyText()">📋 复制文本</button>
+                    </div>
+                </div>
+
+                <!-- 步骤2: 文再生图 -->
+                <div class="step" id="step2">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <h3>🎨 文再生图</h3>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>生成图片的提示词</label>
+                        <textarea rows="4" id="image-prompt" placeholder="基于上一步的描述，调整生成要求...">简约风格无线蓝牙耳机，白色机身，运动场景，高清摄影，商业质感</textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>图片风格</label>
+                        <select style="width: 100%; padding: 12px; border: 2px solid #ecf0f1; border-radius: 8px;">
+                            <option>写实摄影</option>
+                            <option selected>商业产品图</option>
+                            <option>生活方式场景</option>
+                            <option>艺术插画</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="generateImage()">🎨 生成图片</button>
+                    
+                    <div class="result-display" id="image-result" style="display: none;">
+                        <label>AI生成的图片:</label>
+                        <img class="result-image" id="generated-image" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f8f9fa'/%3E%3Ctext x='200' y='150' text-anchor='middle' fill='%23666' font-size='16'%3E🎧 生成的耳机产品图%3C/text%3E%3C/svg%3E" alt="生成的图片">
+                        <div class="controls">
+                            <button class="btn btn-secondary" onclick="regenerateImage()">🔄 重新生成</button>
+                            <button class="btn btn-success" onclick="saveIteration()">💾 保存此版本</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 迭代控制 -->
+                <div class="controls" id="iteration-controls" style="display: none;">
+                    <button class="btn btn-primary" onclick="nextIteration()">➡️ 继续迭代</button>
+                    <button class="btn btn-secondary" onclick="modifyPrompt()">✏️ 调整提示词</button>
+                    <button class="btn btn-success" onclick="exportResult()">📤 导出结果</button>
+                </div>
+            </div>
+
+            <!-- 侧边栏：迭代历史 -->
+            <div class="sidebar">
+                <h3>🔄 迭代历史</h3>
+                <div class="iteration-history" id="history-list">
+                    <div class="history-item active">
+                        <strong>第1轮</strong><br>
+                        <small>文图生文 → 基础描述</small>
+                    </div>
+                    <div class="history-item">
+                        <strong>第2轮</strong><br>
+                        <small>添加运动场景元素</small>
+                    </div>
+                    <div class="history-item">
+                        <strong>第3轮</strong><br>
+                        <small>优化商业质感描述</small>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 33%"></div>
+                </div>
+                <p style="text-align: center; font-size: 14px; color: #7f8c8d;">迭代进度: 1/3</p>
+
+                <div style="margin-top: 20px;">
+                    <h4>⚙️ 快捷设置</h4>
+                    <label style="display: block; margin: 10px 0;">
+                        <input type="checkbox" checked> 自动优化提示词
+                    </label>
+                    <label style="display: block; margin: 10px 0;">
+                        <input type="checkbox" checked> 保存迭代历史
+                    </label>
+                    <label style="display: block; margin: 10px 0;">
+                        <input type="checkbox"> 开启自动迭代
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let iterationCount = 1;
+        
+        // 文件上传预览
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('preview-img');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // 文图生文
+        function generateText() {
+            document.getElementById('text-result').style.display = 'block';
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step1').classList.add('completed');
+            document.getElementById('step2').classList.add('active');
+            document.getElementById('iteration-controls').style.display = 'flex';
+        }
+        
+        // 文再生图
+        function generateImage() {
+            document.getElementById('image-result').style.display = 'block';
+        }
+        
+        // 复制文本
+        function copyText() {
+            const text = document.getElementById('generated-text').innerText;
+            navigator.clipboard.writeText(text);
+            alert('文本已复制到剪贴板！');
+        }
+        
+        // 重新生成图片
+        function regenerateImage() {
+            const img = document.getElementById('generated-image');
+            img.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f0f8ff'/%3E%3Ctext x='200' y='150' text-anchor='middle' fill='%23333' font-size='16'%3E🎧 重新生成的图片 ${Date.now() % 100}%3C/text%3E%3C/svg%3E`;
+        }
+        
+        // 保存迭代
+        function saveIteration() {
+            iterationCount++;
+            const historyList = document.getElementById('history-list');
+            const newItem = document.createElement('div');
+            newItem.className = 'history-item';
+            newItem.innerHTML = `<strong>第${iterationCount}轮</strong><br><small>用户保存的版本</small>`;
+            historyList.appendChild(newItem);
+            
+            // 更新进度条
+            const progress = document.querySelector('.progress-fill');
+            const percent = Math.min((iterationCount / 5) * 100, 100);
+            progress.style.width = percent + '%';
+        }
+        
+        // 继续迭代
+        function nextIteration() {
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step2').classList.add('completed');
+            alert('进入下一轮迭代，基于当前结果继续优化...');
+        }
+        
+        // 调整提示词
+        function modifyPrompt() {
+            document.getElementById('image-prompt').focus();
+        }
+        
+        // 导出结果
+        function exportResult() {
+            alert('📤 导出功能\n\n✅ 图片已保存为 PNG 格式\n✅ 描述文本已保存为 TXT 格式\n✅ 迭代历史已打包下载\n\n文件将发送到您的邮箱或可直接下载');
+        }
+    </script>
+</body>
+</html>
